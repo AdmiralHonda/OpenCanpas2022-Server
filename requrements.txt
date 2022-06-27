@@ -1,0 +1,4 @@
+pandas
+gensim
+pydantic
+sklearn
