@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 import yaml
 import numpy as np
 from recommend.recommend_recipe import RecipeManeg
-from recommend.user_input_assist import InputAssist,UserLikeIngredients
+from recommend.user_input_assist import InputAssist,UserLikeIngredient
 
 class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
 
@@ -19,6 +19,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
             import_user_nutrition = yaml.safe_load(f)
         user_nutrition = [list(nutrition.values())[0] for nutrition in import_user_nutrition["nutrition"] if nutrition.get("water") == None]
         self.user_nutrition = np.array(user_nutrition)
+
         super().__init__()
 
     def fix_name(self, request, context):
@@ -37,15 +38,16 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
     def get_unit_list(self, request, context):
         resp = rec_recipe_pb2.UnitList()
 
-        resp.units.extends(self.user_assist.get_unit_selection(request.query))
+        resp.units.extend(self.user_assist.get_unit_selection(request.query))
         
         return resp
     
     def exchange_to_g(self, request, context):
         resp = rec_recipe_pb2.Ingredient()
 
-        input_query = UserLikeIngredients(name=request.name,unit=request.name,amount=request.amount)
-        fix_result = self.user_assist.exchange_unit_to_g(input_query)
+        input_query = UserLikeIngredient(name=request.name,unit=request.unit,amount=request.amount)
+        
+        fix_result = self.user_assist.exchange_unit_to_g(input_query) # list index out of range
         
         resp.id = fix_result.id
         resp.name = fix_result.name
@@ -56,11 +58,11 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
     def get_recipe(self, request, context):
         resp = rec_recipe_pb2.Recipe()
 
-        recommend_recipe_position = self.rec_engine.culuculate_sim(self.user_nutrition,request.ingredients,rec_mode=0)
-        recommend_recipe = self.rec_engine.get_content(self.rec_engine.get_id(recommend_recipe_position))
+        recommend_recipe_position = self.rec_engine.culuculate_sim(self.user_nutrition,request.ingredients,rec_mode=0)[0]
+        recommend_recipe = self.rec_engine.get_content(recommend_recipe_position)
 
-        resp.title = recommend_recipe.title
-        resp.url = recommend_recipe.url
+        resp.title = recommend_recipe["title"]
+        resp.url = recommend_recipe["url"]
 
         return resp
 

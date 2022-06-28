@@ -2,3 +2,5 @@ pandas
 gensim
 pydantic
 sklearn
+grpcio-tools
+pyyaml

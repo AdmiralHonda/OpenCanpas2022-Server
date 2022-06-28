@@ -20,7 +20,7 @@ message Ingredient {
 }
 
 message Ingredients {
-    map<string, string> ingredients = 1;
+    map<string, double> ingredients = 1;
 }
 
 message UserLikeIngredients {

@@ -1,15 +1,14 @@
-from os import name
 import pandas as pd
 from gensim.models import KeyedVectors
 
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 class SimQueryresp(BaseModel):
     match : bool
     sim_word_list : Optional[List[str]] = []
 
-class UserLikeIngredients(BaseModel):
+class UserLikeIngredient(BaseModel):
     name : str
     unit : str
     amount : float
@@ -25,10 +24,12 @@ class InputAssist():
         self.word_model = KeyedVectors.load_word2vec_format(model_pass, binary=True)
         self.exchange = pd.read_csv(exchange_list_pass,names=["id","name","option","unit","amount"])
 
-    def exchange_unit_to_g(self,user_ingredient: UserLikeIngredients) -> FixedIngredient:
+    def exchange_unit_to_g(self,user_ingredient: UserLikeIngredient) -> FixedIngredient:
         resp = FixedIngredient(id="",name="",amount=0.)
         search = self.exchange.query('name == "{}" and unit == "{}"'.format(user_ingredient.name,user_ingredient.unit))
         
+        if search.empty:
+            return resp
         resp.id = str(search[0:1]["id"].to_list()[0])
         resp.name = str(search[0:1]["name"].to_list()[0])
         resp.amount = float(search[0:1].amount) * user_ingredient.amount
@@ -39,7 +40,7 @@ class InputAssist():
         resp = SimQueryresp(match=False)
         search_list = set(self.exchange["name"].values)
 
-        # クエリがそもそも認識してたらTrueにして返す
+        # クエリがそもそも認識してたらTrueてにし返す
         if query in search_list:
             resp.match = True
             return resp
@@ -61,7 +62,6 @@ if __name__ == "__main__":
     assister = InputAssist("../data/recipe_m1_v400_min_5_w3.vec.pt","../data/exchange.csv")
     print(assister.get_sim_name("きゅうり"))
     print(assister.get_unit_selection("きゅうり"))
-    ttmp = {"name": "きゅうり","unit":"本","amount":1.}
-    tmp = UserLikeIngredients(**ttmp)
-
-    print(assister.exchange_unit_to_g([tmp]))
+    
+    tmp = UserLikeIngredient(name="たまねぎ",unit="個",amount=1.)
+    print(assister.exchange_unit_to_g(tmp))
