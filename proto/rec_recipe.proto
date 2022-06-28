@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+message SimQueryResp {
+    bool match = 1;
+    repeated string sim_word_list = 2;
+}
+
+message Query {
+    string query = 1;
+}
+
+message UnitList {
+    repeated string units = 1; 
+}
+
+message Ingredient {
+    string id = 1;
+    string name = 2;
+    double amount = 3;
+}
+
+message Ingredients {
+    map<string, string> ingredients = 1;
+}
+
+message UserLikeIngredients {
+    string name = 1;
+    string unit = 2;
+    double amount = 3;
+}
+
+message Recipe {
+    string title = 1;
+    string url = 2;
+}
+
+service RecRecipe {
+    rpc fix_name (Query) returns (SimQueryResp);
+    rpc get_unit_list (Query) returns (UnitList);
+    rpc exchange_to_g (UserLikeIngredients) returns (Ingredient);
+    rpc get_recipe (Ingredients) returns (Recipe);
+}
