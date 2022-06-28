@@ -1,3 +1,4 @@
+from os import name
 import pandas as pd
 from gensim.models import KeyedVectors
 
@@ -13,19 +14,24 @@ class UserLikeIngredients(BaseModel):
     unit : str
     amount : float
 
+class FixedIngredient(BaseModel):
+    id: str
+    name: str
+    amount: float
+
 class InputAssist():
 
     def __init__(self, model_pass: str,exchange_list_pass: str) -> None:
-        
         self.word_model = KeyedVectors.load_word2vec_format(model_pass, binary=True)
         self.exchange = pd.read_csv(exchange_list_pass,names=["id","name","option","unit","amount"])
 
-    def exchange_unit_to_g(self,user_ingredients: List[UserLikeIngredients]) -> Dict[str,float]:
-        resp = {}
-
-        for ingredient in user_ingredients:
-            search = self.exchange.query('name == "{}" and unit == "{}"'.format(ingredient.name,ingredient.unit))
-            resp[str(search[0:1]["id"].to_list()[0])] = float(search[0:1].amount) * ingredient.amount
+    def exchange_unit_to_g(self,user_ingredient: UserLikeIngredients) -> FixedIngredient:
+        resp = FixedIngredient(id="",name="",amount=0.)
+        search = self.exchange.query('name == "{}" and unit == "{}"'.format(user_ingredient.name,user_ingredient.unit))
+        
+        resp.id = str(search[0:1]["id"].to_list()[0])
+        resp.name = str(search[0:1]["name"].to_list()[0])
+        resp.amount = float(search[0:1].amount) * user_ingredient.amount
         
         return resp
 

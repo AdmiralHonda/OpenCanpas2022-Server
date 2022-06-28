@@ -10,7 +10,7 @@ class Recipe(BaseModel):
     title : str
     url  : str
 
-class RecRecipe():
+class RecipeManeg():
 
     def __init__(self,nutrition_list_pass : str,ingredients_list_pass : str,content_list_pass : str):
 
@@ -23,7 +23,7 @@ class RecRecipe():
                                 "pantac","biot","vitc"]].values # idと水を除外して行列に
         
         # 各レシピの食材データjsonの読み込み
-        with open(ingredients_list_pass,"r") as f:
+        with open(ingredients_list_pass,"r",encoding="utf-8") as f:
             un_taken_recipe_ingredients = json.load(f)
         self.recipe_ingredients_list = {}
 
@@ -40,7 +40,7 @@ class RecRecipe():
         self.recipe_key_list = list(self.recipe_ingredients_list)
 
         # 推薦されるコンテンツの読み込み
-        with open(content_list_pass,"r") as f:
+        with open(content_list_pass,"r",encoding="utf-8") as f:
             self.recipe_list = json.load(f)
 
     def culuculate_sim(self, user_nutrition : np.ndarray, user_ingredients : dict, rec_mode : int) -> tuple :
