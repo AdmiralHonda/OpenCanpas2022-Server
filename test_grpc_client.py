@@ -1,4 +1,3 @@
-from cgi import test
 import grpc
 import rec_recipe_pb2
 import rec_recipe_pb2_grpc
