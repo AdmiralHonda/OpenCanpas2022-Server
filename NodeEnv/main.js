@@ -46,27 +46,7 @@ app.on('activate', () => {
   }
 })
 
-
-/*
-ipcMain.handle('test', async (event, args) => {
-  var datas = {};
-  console.log(args.userInput);
-  client.fix_name({query: args.userInput}, async function(err, response) {
-    console.log("response:");
-    console.log(response);
-    //return {datas: response} //ここでreturnするとコールバック関数内のreturnになってしまう
-    datas = {match:response.match,sim_word_list:response.sim_word_list};
-    })
-  console.log("datas:");
-  console.log(datas)
-  return datas;
-  //return await {results: {match:datas[0],sim_word_list:datas[1]}}
-})
-*/
-
-ipcMain.handle('test', async (event, args) => {
-  // var datas = {};
-  // console.log(args.userInput);
+ipcMain.handle('fixname', async (event, args) => {
   const datas = await new Promise((resolve) => {
     client.fix_name({query: args.userInput}, async (err, response) => {
       resolve({
@@ -77,8 +57,63 @@ ipcMain.handle('test', async (event, args) => {
   })
   console.log("datas:");
   console.log(datas);
-  return datas; //このdatasが2行目の結果を返してしまう = コールバック関数のdatasの代入が上手く行かない
+  return datas;
 });
+
+ipcMain.handle('getunitlist', async (event, args) => {
+  const datas = await new Promise((resolve) => {
+    client.get_unit_list({query: args.userInput}, async (err, response) => {
+      resolve({
+        units: response.units //list
+      })
+    });
+  })
+  console.log("datas:");
+  console.log(datas);
+  return datas;
+});
+
+ipcMain.handle('exchangetog', async (event, args) => {
+  const datas = await new Promise((resolve) => {
+    client.exchange_to_g({name: args.userInput, unit: "個", amount: "1"}, async (err, response) => {
+      resolve({
+        ingredients: response.ingredients //dict
+      })
+    });
+  })
+  console.log("datas:");
+  console.log(datas);
+  return datas;
+});
+
+ipcMain.handle('getrecipe', async (event, args) => {
+  const datas = await new Promise((resolve) => {
+    client.get_recipe(args.ingredients, async (err, response) => {
+      resolve({
+        units: response.ingredients //dict
+      })
+    });
+  })
+  console.log("datas:");
+  console.log(datas);
+  return datas;
+});
+
+/*
+ipcMain.handle('getunitlist', async (event, args) => {
+  const datas = await new Promise((resolve) => {
+    client.fix_name({query: args.userInput}, async (err, response) => {
+      resolve({
+        match: response.match,
+        sim_word_list: response.sim_word_list
+      })
+    });
+  })
+  console.log("datas:");
+  console.log(datas);
+  return datas;
+});
+*/
 
 /*
 ipcMain.handle('epubopen', async (event) => {
