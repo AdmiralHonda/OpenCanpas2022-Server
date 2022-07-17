@@ -46,23 +46,39 @@ app.on('activate', () => {
   }
 })
 
+
+/*
 ipcMain.handle('test', async (event, args) => {
   var datas = {};
   console.log(args.userInput);
-  //dialog.showMessageBoxSync(null, { message: "Hoge"})  
-  await client.fix_name({query: args.userInput}, async function(err, response) {
+  client.fix_name({query: args.userInput}, async function(err, response) {
     console.log("response:");
     console.log(response);
     //return {datas: response} //ここでreturnするとコールバック関数内のreturnになってしまう
-    //datas.push(response.match);
-    //datas.push(response.sim_word_list);
     datas = {match:response.match,sim_word_list:response.sim_word_list};
-    //ipcRenderer.send('message', {match:response.match,sim_word_list:response.sim_word_list});
-  })
+    })
+  console.log("datas:");
+  console.log(datas)
   return datas;
   //return await {results: {match:datas[0],sim_word_list:datas[1]}}
 })
+*/
 
+ipcMain.handle('test', async (event, args) => {
+  // var datas = {};
+  // console.log(args.userInput);
+  const datas = await new Promise((resolve) => {
+    client.fix_name({query: args.userInput}, async (err, response) => {
+      resolve({
+        match: response.match,
+        sim_word_list: response.sim_word_list
+      })
+    });
+  })
+  console.log("datas:");
+  console.log(datas);
+  return datas; //このdatasが2行目の結果を返してしまう = コールバック関数のdatasの代入が上手く行かない
+});
 
 /*
 ipcMain.handle('epubopen', async (event) => {
