@@ -1,0 +1,28 @@
+{
+  "name": "opencampus2022grpc",
+  "version": "0.0.1",
+  "description": "With AdmiralHonda's Project",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-packager . --overwrite",
+    "m1macbuild": "electron-packager . --platform=darwin --arch=arm64 --overwrite",
+    "intelmacbuild": "electron-packager . --platform=darwin --arch=x64 --overwrite",
+    "winbuild": "electron-packager . --platform=win32 --arch=x64 --overwrite"
+  },
+  "author": "M.S",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.5.0",
+    "async": "^1.5.2",
+    "google-protobuf": "^3.0.0",
+    "@grpc/grpc-js": "^1.1.0",
+    "lodash": "^4.6.1",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "electron": "^18.2.0",
+    "electron-packager": "^15.5.1"
+  }
+}

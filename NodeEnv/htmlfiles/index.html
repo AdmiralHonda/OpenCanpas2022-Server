@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./output.css">
+  <style type="text/css">
+    .halfheight {
+      height: 50vh;
+      width: 100vw;
+    }
+  </style>
+  <title>[ForDev]Receipe Recommendation System - Client[ver20220705-beta]</title>
+</head>
+
+<body>
+  <div class="halfheight">
+
+    <nav class="bg-white border-gray-100 px-2 sm:px-4 py-2.5 dark:bg-gray-500 drop-shadow-xl">
+      <div class="container flex flex-wrap justify-between items-center mx-auto">
+        <a href="./" class="flex items-center">
+          <span class="text-xl font-semibold" alt="Logo">&#x1F37D;</span>
+          <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">献立推薦システム</span>
+        </a>
+        <div class="flex md:order-2">
+          <button type="button"
+            class="text-white bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-lime-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
+            再読み込み</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto relative shadow-md sm:rounded-lg">
+      <div class="grid grid-cols-6 w-full py-6">
+        <div class="col-span-3 px-3">
+          <div class="absolute gap-x-1 gap-y-2 py-3 pl-1 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <input id="foodinput" name="foodinput" type="text" placeholder="食材名をここに入力"
+            class="w-full pl-10 p-2.5 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
+          <div id="foodsuggest"></div>
+        </div>
+        <div class="col-span-1 px-3">
+          <input type="text" id="table-search" placeholder="単位(グラム等)を入力"
+            class=" w-full pl-1 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
+        </div>
+        <div class="col-span-1 px-3">
+          <input type="text" id="table-search" placeholder="数量をここに入力"
+            class="w-full pl-1 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
+        </div>
+        <div class="col-span-1 px-3">
+          <button type="button" id="addBtn" name="addBtn"
+            class="w-full text-white-0 py-3 bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-lime-300 font-medium rounded-lg text-sm text-center dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
+            食材追加的なボタン</button>
+        </div>
+      </div>
+
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-white-0 dark:bg-white-0 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="p-4">
+              <div class="flex items-center">
+                <input id="checkbox-all-search" type="checkbox"
+                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                <label for="checkbox-all-search" class="sr-only">checkbox</label>
+              </div>
+            </th>
+            <th scope="col" class="px-14 py-3">
+              食材名
+            </th>
+            <th scope="col" class="px-4 py-3">
+              量の単位
+            </th>
+            <th scope="col" class="px-4 py-3">
+              個数
+            </th>
+            <th scope="col" class="px-4 py-3">
+              <!--必要ならこの列をグラム表示等にする？-->
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="bg-white dark:bg-white-0 dark:border-gray-700 hover:bg-white-0 dark:hover:bg-white-0">
+            <td class="w-4 p-4">
+              <div class="flex items-center">
+                <input id="checkbox-table-search-1" type="checkbox"
+                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+              </div>
+            </td>
+            <th scope="row" class="px-14 py-4 font-medium text-gray-900 dark:text-black whitespace-nowrap">
+              ピーマン
+            </th>
+            <td class="px-4 py-4">
+              個
+            </td>
+            <td class="px-4 py-4">
+              3
+            </td>
+            <td class="px-4 py-4">
+              <!--Additional Contents-->
+            </td>
+          </tr>
+          <tr class="bg-white dark:bg-white-0 dark:border-gray-700 hover:bg-white-0 dark:hover:bg-white-0">
+            <td class="w-4 p-4">
+              <div class="flex items-center">
+                <input id="checkbox-table-search-2" type="checkbox"
+                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                <label for="checkbox-table-search-2" class="sr-only">checkbox</label>
+              </div>
+            </td>
+            <th scope="row" class="px-14 py-4 font-medium text-gray-900 dark:text-black whitespace-nowrap">
+              豚肉
+            </th>
+            <td class="px-4 py-4">
+              グラム
+            </td>
+            <td class="px-4 py-4">
+              500
+            </td>
+            <td class="px-4 py-4">
+              <!--Additional Contents-->
+            </td>
+          </tr>
+          <tr class="bg-white dark:bg-white-0 hover:bg-white-0 dark:hover:bg-white-0">
+            <td class="w-4 p-4">
+              <div class="flex items-center">
+                <input id="checkbox-table-search-3" type="checkbox"
+                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                <label for="checkbox-table-search-3" class="sr-only">checkbox</label>
+              </div>
+            </td>
+            <th scope="row" class="px-14 py-4 font-medium text-gray-900 dark:text-black whitespace-nowrap">
+              にんじん
+            </th>
+            <td class="px-4 py-4">
+              個
+            </td>
+            <td class="px-4 py-4">
+              1
+            </td>
+            <td class="px-4 py-4">
+              <!--Additional Contents-->
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+</body>
+<script src="suggest.js"></script>
+<script src="index.js"></script>
+<script>
+  var isProcessing = false //問い合わせ中にinvokeが複数回走るのを防ぐ処置
+  var foodlist = []
+
+  window.addEventListener('DOMContentLoaded', function () { });
+  let foodinput = document.getElementById('foodinput');
+
+  foodinput.addEventListener('keypress', async () => {
+    var args = { userInput: document.querySelector('#foodinput').value };
+
+    if (isProcessing) return;
+    isProcessing = true;
+
+    /*
+    window.requires.ipcRenderer.invoke('test', args).then((result) =>{
+
+    });
+    */
+    var retval = await window.requires.ipcRenderer.invoke('test', args);
+    console.log(retval)
+    //console.log(retval.match);
+    //console.log(retval.sim_word_list);
+    foodlist = retval.sim_word_list;
+    //[TODO]ここにmatchがtruだった場合のデザイン変更をやる
+    //if (!retval.match && foodlist.length !== 0 ) new Suggest.Local("foodinput", "foodsuggest", foodlist, { ignoreCase: false, prefix: true, highlight: true });
+
+    isProcessing = false;
+  });
+
+  
+  window.requires.ipcRenderer.on('message', (event, args) => {
+    console.log("Test");
+  });
+</script>
+
+</html>

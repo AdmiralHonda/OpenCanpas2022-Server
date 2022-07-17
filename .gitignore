@@ -130,3 +130,8 @@ dmypy.json
 
 /data/
 /ocan2022/
+
+#Node用ファイル群
+/NodeEnv/node_modules/
+# Win/Mac間の依存パッケージ関係なく保存してしまうため除く
+/NodeEnv/package-lock.json
