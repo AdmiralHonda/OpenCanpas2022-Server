@@ -1,5 +1,5 @@
 const path = require('path')
-const { app, BrowserWindow, ipcMain, dialog, ipcRenderer} = require('electron')
+const {shell, app, BrowserWindow, ipcMain, dialog, ipcRenderer } = require('electron')
 
 //gRPC用変数宣言
 var PROTO_PATH = __dirname + '/../proto/rec_recipe.proto';
@@ -7,13 +7,14 @@ var PROTO_PATH = __dirname + '/../proto/rec_recipe.proto';
 var grpc = require('@grpc/grpc-js');
 var protoLoader = require('@grpc/proto-loader');
 var packageDefinition = protoLoader.loadSync(
-    PROTO_PATH,
-    {keepCase: true,
-     longs: String,
-     enums: String,
-     defaults: true,
-     oneofs: true
-    });
+  PROTO_PATH,
+  {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true
+  });
 var test_proto = grpc.loadPackageDefinition(packageDefinition);
 var client = new test_proto.RecRecipe('localhost:50051', grpc.credentials.createInsecure());
 
@@ -48,7 +49,7 @@ app.on('activate', () => {
 
 ipcMain.handle('fixname', async (event, args) => {
   const datas = await new Promise((resolve) => {
-    client.fix_name({query: args.userInput}, async (err, response) => {
+    client.fix_name({ query: args.userInput }, async (err, response) => {
       resolve({
         match: response.match,
         sim_word_list: response.sim_word_list
@@ -62,7 +63,7 @@ ipcMain.handle('fixname', async (event, args) => {
 
 ipcMain.handle('getunitlist', async (event, args) => {
   const datas = await new Promise((resolve) => {
-    client.get_unit_list({query: args.userInput}, async (err, response) => {
+    client.get_unit_list({ query: args.userInput }, async (err, response) => {
       resolve({
         units: response.units //list
       })
@@ -75,10 +76,14 @@ ipcMain.handle('getunitlist', async (event, args) => {
 
 ipcMain.handle('exchangetog', async (event, args) => {
   const datas = await new Promise((resolve) => {
-    client.exchange_to_g({name: args.userInput, unit: "個", amount: "1"}, async (err, response) => {
-      resolve({
-        ingredients: response.ingredients //dict
-      })
+    client.exchange_to_g({ name: args.name, unit: args.unit, amount: args.amount }, async (err, response) => {
+      resolve(
+        {
+          id: response.id,
+          name: response.name,
+          amount: response.amount
+        }//dict
+      )
     });
   })
   console.log("datas:");
@@ -88,66 +93,21 @@ ipcMain.handle('exchangetog', async (event, args) => {
 
 ipcMain.handle('getrecipe', async (event, args) => {
   const datas = await new Promise((resolve) => {
-    client.get_recipe(args.ingredients, async (err, response) => {
+    client.get_recipe({ ingredients: args.ingredients }, async (err, response) => {
       resolve({
-        units: response.ingredients //dict
+        title: response.title, //dict
+        url: response.url
       })
     });
   })
+  shell.openExternal(datas.url);
   console.log("datas:");
   console.log(datas);
   return datas;
 });
 
 /*
-ipcMain.handle('getunitlist', async (event, args) => {
-  const datas = await new Promise((resolve) => {
-    client.fix_name({query: args.userInput}, async (err, response) => {
-      resolve({
-        match: response.match,
-        sim_word_list: response.sim_word_list
-      })
-    });
-  })
-  console.log("datas:");
-  console.log(datas);
-  return datas;
-});
-*/
-
-/*
-ipcMain.handle('epubopen', async (event) => {
-  let mes = "_a_a"
-  dialog.showMessageBoxSync(null, { message: mes })
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    filters: [{ name: 'Documents', extensions: ['zip'] }]
-  })
-  if (canceled) return { canceled, data: [] }
-  //console.log(filePaths)
-  return { canceled, data: [filePaths] }
-})
-*/
-
-/*
-ipcMain.handle('unzip', async (event, args) => {
-  //console.log(args.zipPath)
-  if (!path.extname(args.zipPath).toLowerCase === '.zip' && !path.extname(args.zipPath).toLowerCase === '.epub') {
-    let mes = "ファイルを指定してください"
-    dialog.showMessageBoxSync(null, { message: mes })
-    return { canceled: true, data: [''] }
-  }
-  if (!fs.existsSync(args.zipPath)) {
-    let mes = "指定されたファイルが見つかりませんでした"
-    dialog.showMessageBoxSync(null, { message: mes })
-    return { canceled: true, data: [''] }
-  }
-  else {
-    const fileStat = fs.statSync(args.zipPath)
-    if (fileStat.isDirectory()) {
-      let mes = "指定されたパスはフォルダのようです"
-      dialog.showMessageBoxSync(null, { message: mes })
-      return { canceled: true, data: [''] }
-    }
-  }
+ipcMain.handle('throwerr', async (event, args) => {
+  dialog.showMessageBoxSync(null, { message: "someError" })
 });
 */

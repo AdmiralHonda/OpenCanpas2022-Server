@@ -10,6 +10,29 @@
       height: 50vh;
       width: 100vw;
     }
+
+
+    #-imp-suggestlist {
+      display: none;
+      background: #fff;
+      border: 1px solid #c3c3c3;
+    }
+
+    #-imp-suggestlist ul {
+      -webkit-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.3);
+      -moz-box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.3);
+      box-shadow: 3px 3px 5px 0px rgba(0, 0, 0, 0.3);
+    }
+
+    #-imp-suggestlist li {
+      cursor: pointer;
+      color: #000;
+      padding: 3px 5px;
+    }
+
+    #-imp-suggestlist li:hover {
+      background: #eee;
+    }
   </style>
   <title>[ForDev]Receipe Recommendation System - Client[ver20220705-beta]</title>
 </head>
@@ -25,7 +48,8 @@
         </a>
         <div class="flex md:order-2">
           <button type="button"
-            class="text-white bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-lime-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
+            class="text-white bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-lime-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-3 md:mr-0 dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800"
+            onclick="window.location.reload();">
             再読み込み</button>
         </div>
       </div>
@@ -42,35 +66,39 @@
                 clip-rule="evenodd"></path>
             </svg>
           </div>
-          <input id="foodinput" name="foodinput" type="text" placeholder="食材名をここに入力"
-            class="w-full pl-10 p-2.5 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
-          <div id="foodsuggest"></div>
+          <div id="foodsearch">
+            <input id="foodinput" name="foodinput" type="text" placeholder="食材名をここに入力"
+              class="w-full pl-10 p-2.5 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
+            <div id="foodsuggest" style="display:none;" class="-imp-suggestlist">
+              <ul id="foodsuggestlist">
+                <li>ここにサジェスト</li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div class="col-span-1 px-3">
-          <input type="text" id="table-search" placeholder="単位(グラム等)を入力"
+          <select id="unitselect" name="unitinput" type="" id="table-search" placeholder="単位(グラム等)を入力"
             class=" w-full pl-1 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
+            <!--<option>グラム</option>-->
+          </select>
         </div>
         <div class="col-span-1 px-3">
-          <input type="text" id="table-search" placeholder="数量をここに入力"
+          <input id="amountinput" name="amountinput" type="number" id="table-search" placeholder="数量をここに入力"
             class="w-full pl-1 bg-white-0 py-3 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block dark:bg-white-0 dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-white-500 dark:focus:border-white-500">
         </div>
         <div class="col-span-1 px-3">
-          <button type="button" id="addBtn" name="addBtn"
-            class="w-full text-white-0 py-3 bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-lime-300 font-medium rounded-lg text-sm text-center dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
+          <button type="button" id="addBtn" name="addBtn" onclick="checkInputFormAndInvoke();"
+            class="w-full text-white py-3 bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-white-500 font-medium rounded-lg text-sm text-center dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
             食材追加的なボタン</button>
         </div>
       </div>
+    </div>
 
-      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <div class="absolute container mx-auto relative shadow-md sm:rounded-lg">
+
+      <table id="ingredientsTable" class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-white-0 dark:bg-white-0 dark:text-gray-400">
           <tr>
-            <th scope="col" class="p-4">
-              <div class="flex items-center">
-                <input id="checkbox-all-search" type="checkbox"
-                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
-                <label for="checkbox-all-search" class="sr-only">checkbox</label>
-              </div>
-            </th>
             <th scope="col" class="px-14 py-3">
               食材名
             </th>
@@ -80,13 +108,38 @@
             <th scope="col" class="px-4 py-3">
               個数
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" class="px-4 py-3" hidden>
               <!--必要ならこの列をグラム表示等にする？-->
+            </th>
+            <th scope="col" class="p-4">
+              <div class="flex items-center">
+                <p
+                  class="w-8 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                  &#x1f5d1;</p>
+                <!--
+                <input id="checkbox-all-search" type="checkbox"
+                  class="w-4 h-4 text-black-600 bg-white-0 border-gray-300 rounded focus:ring-white-500 dark:focus:ring-white-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-white-0 dark:border-gray-600">
+                <label for="checkbox-all-search" class="sr-only">checkbox</label>
+                -->
+              </div>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr class="bg-white dark:bg-white-0 dark:border-gray-700 hover:bg-white-0 dark:hover:bg-white-0">
+            <!--
+            <td scope="row" class="px-14 py-4 font-medium text-gray-900 dark:text-black whitespace-nowrap">
+              テスト内容
+            </td>
+            <td class="px-4 py-4">
+              unit
+            </td>
+            <td class="px-4 py-4">
+              amount
+            </td>
+            <td class="px-4 py-4" hidden>
+              gram[hidden]
+            </td>
             <td class="w-4 p-4">
               <div class="flex items-center">
                 <input id="checkbox-table-search-1" type="checkbox"
@@ -94,19 +147,9 @@
                 <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
               </div>
             </td>
-            <th scope="row" class="px-14 py-4 font-medium text-gray-900 dark:text-black whitespace-nowrap">
-              ピーマン
-            </th>
-            <td class="px-4 py-4">
-              個
-            </td>
-            <td class="px-4 py-4">
-              3
-            </td>
-            <td class="px-4 py-4">
-              <!--Additional Contents-->
-            </td>
+            -->
           </tr>
+          <!--
           <tr class="bg-white dark:bg-white-0 dark:border-gray-700 hover:bg-white-0 dark:hover:bg-white-0">
             <td class="w-4 p-4">
               <div class="flex items-center">
@@ -125,7 +168,7 @@
               500
             </td>
             <td class="px-4 py-4">
-              <!--Additional Contents-->
+              Additional Contents
             </td>
           </tr>
           <tr class="bg-white dark:bg-white-0 hover:bg-white-0 dark:hover:bg-white-0">
@@ -146,49 +189,32 @@
               1
             </td>
             <td class="px-4 py-4">
-              <!--Additional Contents-->
             </td>
           </tr>
+          -->
         </tbody>
       </table>
+        <div class="grid grid-cols-6 w-full py-6">
+          <div class="col-span-1 px-3"></div>
+          <div class="col-span-1 px-3"></div>
+          <div class="col-span-1 px-3"></div>
+          <div class="col-span-1 px-3"></div>
+          <div class="col-span-1 px-3"></div>
+          <div class="col-span-1 px-3">
+            <button type="button" id="addBtn" name="addBtn" onclick="receipeInvoke();"
+              class="w-full text-white py-3 bg-lime-700 hover:bg-lime-800 focus:ring-4 focus:outline-none focus:ring-white-500 font-medium rounded-lg text-sm text-center dark:bg-lime-600 dark:hover:bg-lime-700 dark:focus:ring-lime-800">
+              レシピを推薦する</button>
+          </div>
+        </div>
+    </div>
+    <div class="halfheight w-full">
+      <iframe id="iframewebsite" class="w-full" src="">
+
+      </iframe>
     </div>
 
 </body>
-<script src="suggest.js"></script>
+<script src="jquery-3.6.0.min.js"></script>
 <script src="index.js"></script>
-<script>
-  var isProcessing = false //問い合わせ中にinvokeが複数回走るのを防ぐ処置
-  var foodlist = []
-
-  window.addEventListener('DOMContentLoaded', function () { });
-  let foodinput = document.getElementById('foodinput');
-
-  foodinput.addEventListener('keypress', async () => {
-    var args = { userInput: document.querySelector('#foodinput').value };
-
-    if (isProcessing) return;
-    isProcessing = true;
-
-    /*
-    window.requires.ipcRenderer.invoke('test', args).then((result) =>{
-
-    });
-    */
-    var retval = await window.requires.ipcRenderer.invoke('test', args);
-    console.log(retval)
-    //console.log(retval.match);
-    //console.log(retval.sim_word_list);
-    foodlist = retval.sim_word_list;
-    //[TODO]ここにmatchがtruだった場合のデザイン変更をやる
-    //if (!retval.match && foodlist.length !== 0 ) new Suggest.Local("foodinput", "foodsuggest", foodlist, { ignoreCase: false, prefix: true, highlight: true });
-
-    isProcessing = false;
-  });
-
-  
-  window.requires.ipcRenderer.on('message', (event, args) => {
-    console.log("Test");
-  });
-</script>
 
 </html>
