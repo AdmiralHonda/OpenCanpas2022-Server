@@ -30,7 +30,7 @@ function createWindow() {
 
   win.setMenuBarVisibility(false)
   win.loadFile('./htmlfiles/index.html')
-  if (!app.isPackaged) win.webContents.openDevTools()
+  //if (!app.isPackaged) win.webContents.openDevTools()
 }
 
 app.whenReady().then(createWindow)
@@ -92,6 +92,7 @@ ipcMain.handle('exchangetog', async (event, args) => {
 });
 
 ipcMain.handle('getrecipe', async (event, args) => {
+  console.log(args.ingredients);
   const datas = await new Promise((resolve) => {
     client.get_recipe({ ingredients: args.ingredients }, async (err, response) => {
       resolve({

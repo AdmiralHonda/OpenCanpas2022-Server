@@ -30,6 +30,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
         return os.path.join(os.path.abspath("."), relative_path)
 
     def fix_name(self, request, context):
+        print(request)
         resp = rec_recipe_pb2.SimQueryResp()
         
         fix_result = self.user_assist.get_sim_name(request.query)
@@ -43,6 +44,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
         return resp
     
     def get_unit_list(self, request, context):
+        print(request)
         resp = rec_recipe_pb2.UnitList()
 
         resp.units.extend(self.user_assist.get_unit_selection(request.query))
@@ -50,6 +52,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
         return resp
     
     def exchange_to_g(self, request, context):
+        print(request)
         resp = rec_recipe_pb2.Ingredient()
 
         input_query = UserLikeIngredient(name=request.name,unit=request.unit,amount=request.amount)
@@ -63,6 +66,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
         return resp
     
     def get_recipe(self, request, context):
+        print(request)
         resp = rec_recipe_pb2.Recipe()
 
         """
@@ -96,7 +100,7 @@ class RecRecipeHandle(rec_recipe_pb2_grpc.RecRecipeServicer):
         # input_u_nutrition = self.user_nutrition + base_nutrition_vec
         """
         
-        recommend_recipe_position = self.rec_engine.culuculate_sim(self.user_nutrition,request.ingredients,rec_mode=0)[0]
+        recommend_recipe_position = self.rec_engine.culuculate_sim(self.user_nutrition,request.ingredients,rec_mode=1)[0]
         recommend_recipe = self.rec_engine.get_content(recommend_recipe_position)
 
         resp.title = recommend_recipe["title"]

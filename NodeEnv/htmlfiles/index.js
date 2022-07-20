@@ -1,19 +1,18 @@
 var isProcessing = false //問い合わせ中にinvokeが複数回走るのを防ぐ処置
 
-let ingredientsList = [];
+let ingredientsDict = {};
 
 window.addEventListener('DOMContentLoaded', async function () {
-  
   /*
   //以下テスト用コード
-  let args0 = { userInput: "しょうゆ" }; //Query
+  let args0 = { userInput: "あじ" }; //Query
   let retval0 = await window.requires.ipcRenderer.invoke('fixname', args0);
   console.log(retval0) //SimQueryResp
 
   let args1 = {};
   let retval1;
   if (retval0.match) {
-    args1 = { userInput: "しょうゆ" }; //Query
+    args1 = { userInput: "あじ" }; //Query
     let retval1 = await window.requires.ipcRenderer.invoke('getunitlist', args1);
     console.log(retval1); //UnitList
 
@@ -22,22 +21,28 @@ window.addEventListener('DOMContentLoaded', async function () {
     //console.log("エラー内容");
     //console.log(retval1); //{"units": []}
 
-    let args2 = { name: "しょうゆ", unit: "大さじ", amount: 2 } //UserLikeIngredients
+    let args2 = { name: "あじ", unit: "匹", amount: 2 } //UserLikeIngredients
     retval2 = await window.requires.ipcRenderer.invoke('exchangetog', args2);
     console.log(retval2); //Ingredient
-    ingredientsList.push(retval2);
+
+    let args3 = {}; //Ingredients
+    args3[retval2.id]=retval2.amount;
+
+    args2 = { name: "塩", unit: "大さじ", amount: 2 } //UserLikeIngredients
+    retval2 = await window.requires.ipcRenderer.invoke('exchangetog', args2);
+    console.log(retval2); //Ingredient
+
+    args3[retval2.id]=retval2.amount;
 
     //検証用：不正なパラメータで送ると各パラメータが空の文字列が返ってきてamountは0になる
     //retval2 = await window.requires.ipcRenderer.invoke('exchangetog', { name: "しょうゆ", unit: "エラー", amount: 100 });
     //console.log("エラー内容");
     //console.log(retval2); //{"id": "","name": "","amount": 0}
 
-    let args3 = new Map(); //Ingredients
-    args3.set(retval2.id, retval2.amount);
-    let retval3 = await window.requires.ipcRenderer.invoke('getrecipe', args3);
+    let retval3 = await window.requires.ipcRenderer.invoke('getrecipe',{ingredients:args3});
     console.log(retval3); //Recipe
-
     //ここまでテスト
+    
   }*/
 });
 
@@ -87,28 +92,27 @@ async function checkInputFormAndInvoke() {
   if (!document.getElementById("foodinput").value && !document.getElementById("unitselect").value && !document.getElementById("amountinput").value) {
     alert("左のフォームを入力してください");
   }
-  else{
-  let invokeArgs;
-  let retval;
+  else {
+    let invokeArgs;
+    let retval;
 
-  invokeArgs = { name: document.getElementById("foodinput").value, unit: document.getElementById("unitselect").value, amount: document.getElementById("amountinput").value };
-  retval = await window.requires.ipcRenderer.invoke('exchangetog', invokeArgs);
+    invokeArgs = { name: document.getElementById("foodinput").value, unit: document.getElementById("unitselect").value, amount: document.getElementById("amountinput").value };
+    retval = await window.requires.ipcRenderer.invoke('exchangetog', invokeArgs);
 
-  ingredientsTableAdd([retval.name, invokeArgs.unit, invokeArgs.amount, retval.id]);
-  let ingredient = new Map();
-  ingredient.set(retval.id, retval.amount);
-  ingredientsList.push(ingredient);
-  cleanupForm();
+    ingredientsTableAdd([retval.name, invokeArgs.unit, invokeArgs.amount, retval.id]);
+    ingredientsDict[retval.id]=retval.amount;
+    cleanupForm();
   }
 }
 
 async function receipeInvoke() {
-  if (ingredientsList.length > 0){
-  let retval = await window.requires.ipcRenderer.invoke('getrecipe', {ingredients:ingredientsList});
-  console.log(retval.title)
-  //document.getElementById("iframewebsite").src = retval.url;
+  if (ingredientsDict !== {}) {
+    console.log(ingredientsDict);
+    let retval = await window.requires.ipcRenderer.invoke('getrecipe', { ingredients: ingredientsDict });
+    console.log(retval.title)
+    //document.getElementById("iframewebsite").src = retval.url;
   }
-  else {alert("食材を入力してください");}
+  else { alert("食材を入力してください"); }
 }
 
 /*
@@ -163,9 +167,9 @@ function cleanupForm() {
   document.getElementById('amountinput').value = '';
   let unitselect = document.getElementById("unitselect");
   if (unitselect.hasChildNodes()) {
-		while (unitselect.childNodes.length > 0) {
-			unitselect.removeChild(unitselect.firstChild);
-		}
+    while (unitselect.childNodes.length > 0) {
+      unitselect.removeChild(unitselect.firstChild);
+    }
   }
   isFoodDecided = false;
 }
@@ -269,7 +273,7 @@ async function searchFocus(textInput, textBox, nextBox) {
         childel.addEventListener('click', async () => {
           let thisval = retval.sim_word_list[i];
           document.getElementById("foodinput").value = thisval;
-          document.getElementById("foodinput").disabled = true;
+          //document.getElementById("foodinput").disabled = true;
           document.getElementById("foodsuggest").setAttribute('style', 'display:none;');
           let sugchk = await window.requires.ipcRenderer.invoke('fixname', { userInput: thisval });
           if (sugchk.match && !isFoodDecided) {
@@ -277,7 +281,6 @@ async function searchFocus(textInput, textBox, nextBox) {
             pullDownAddInvoke();
           }
           else {
-            isFoodDecided = false;
             //alert("[Client]An error occured.");
           }
         });
@@ -297,7 +300,7 @@ async function searchFocus(textInput, textBox, nextBox) {
       //テキストフォームとサジェスト以外がクリックされたときに処理する
       $(document).click(async function (e) {
         if (!isFoodDecided && retval.match) {
-          document.getElementById("foodinput").disabled = true;
+          //document.getElementById("foodinput").disabled = true;
           document.getElementById("foodsuggest").setAttribute('style', 'display:none;');
           let sugchk = await window.requires.ipcRenderer.invoke('fixname', { userInput: document.getElementById("foodinput").value });
           if (sugchk.match && !isFoodDecided) {
@@ -305,7 +308,6 @@ async function searchFocus(textInput, textBox, nextBox) {
             pullDownAddInvoke();
           }
           else {
-            isFoodDecided = false;
             //alert("[Client]An error occured.");
           }
         }
